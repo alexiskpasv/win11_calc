@@ -53,7 +53,9 @@ The project follows the **MVVM (Model-View-ViewModel)** pattern adapted for the 
 ├── tailwind.config.js   # Style configurations
 └── package.json
 
-## ⚙️ Development & Deployment
+---
+
+ ⚙️ Development & Deployment
 
 ### Local Setup
 1. **Clone the repo:**
