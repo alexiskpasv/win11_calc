@@ -1,0 +1,68 @@
+.mica-window {
+  background: var(--bg-mica);
+  backdrop-filter: blur(30px) saturate(125%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.calc-button {
+  background: var(--bg-button);
+  transition: all 0.1s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.calc-button:hover {
+  background: var(--bg-button-hover);
+  border-color: var(--border-subtle);
+}
+
+.calc-button:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+.reveal-container {
+  --mouse-x: 0px;
+  --mouse-y: 0px;
+}
+
+.calc-button {
+  position: relative;
+  background: var(--bg-button);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden; /* Clips the inner glow */
+}
+
+/* The Border Reveal (The Glow that follows the mouse) */
+.calc-button::before {
+  content: '';
+  position: absolute;
+  inset: -1px; /* Slightly larger than button to show on border */
+  background: radial-gradient(
+    250px circle at var(--mouse-x) var(--mouse-y), 
+    rgba(255, 255, 255, 0.15), 
+    transparent 40%
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.calc-button:hover::before {
+  opacity: 1;
+}
+
+/* The Mica/Acrylic Background */
+.mica-window {
+  background: var(--bg-mica);
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
