@@ -52,3 +52,36 @@ The project follows the **MVVM (Model-View-ViewModel)** pattern adapted for the 
 │   └── main.jsx         # Entry point
 ├── tailwind.config.js   # Style configurations
 └── package.json
+
+## ⚙️ Development & Deployment
+
+### Local Setup
+1. **Clone the repo:**
+   ```bash
+   git clone [https://github.com/alexiskpasv/win11_calc.git](https://github.com/alexiskpasv/win11_calc.git)
+
+2. **Install dependencies:**
+
+3.  ```bash
+    npm install
+    Run in dev mode:
+
+4 . ```bash
+    npm run dev
+    
+5.  **CI/CD Pipeline**
+    This project uses GitHub Actions for automated deployment.
+
+Trigger: Any push to the main branch.
+
+Process: Installs dependencies, runs a production build, and deploys the dist folder to the gh-pages branch.
+
+Configuration: The vite.config.js is set with base: '/win11_calc/' to ensure asset paths resolve correctly on GitHub's servers.
+
+##📝 License
+This project is open-source and available under the MIT License.
+
+Developed with ❤️ by alexiskpasv
+
+
+**Would you like me to help you generate a `LICENSE` file text or perhaps a `preview.png` mockup for the README?**
