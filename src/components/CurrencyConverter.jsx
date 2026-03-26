@@ -14,45 +14,49 @@ const CurrencyConverter = () => {
   }, [store.baseCurrency]);
 
   return (
-    <div className="flex flex-col p-6 gap-8 animate-in fade-in duration-500">
-      {/* Top Input (Base) */}
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col p-6 gap-6 animate-in fade-in duration-500 text-white">
+      {/* Base Currency Selection */}
+      <div className="flex flex-col gap-1">
         <select 
-          className="bg-transparent text-sm font-semibold outline-none"
+          className="bg-transparent text-sm font-semibold outline-none cursor-pointer hover:text-blue-400"
           value={store.baseCurrency}
-          onChange={(e) => set({ baseCurrency: e.target.value })}
+          onChange={(e) => useConverterStore.setState({ baseCurrency: e.target.value })}
         >
-          <option value="USD">United States - Dollar</option>
-          <option value="EUR">Euro Area - Euro</option>
-          <option value="GBP">United Kingdom - Pound</option>
+          <option value="USD" className="bg-[#1a1a1a]">USD - US Dollar</option>
+          <option value="EUR" className="bg-[#1a1a1a]">EUR - Euro</option>
+          <option value="GBP" className="bg-[#1a1a1a]">GBP - British Pound</option>
+          <option value="NGN" className="bg-[#1a1a1a]">NGN - Nigerian Naira</option>
         </select>
         <input 
           type="number" 
           value={store.baseValue}
           onChange={(e) => store.updateBaseValue(e.target.value)}
-          className="text-4xl font-bold bg-transparent outline-none w-full"
+          className="text-5xl font-light bg-transparent outline-none w-full"
         />
       </div>
 
-      {/* Bottom Input (Target) */}
-      <div className="flex flex-col gap-2 border-t border-white/10 pt-8">
+      {/* Target Currency Selection */}
+      <div className="flex flex-col gap-1 border-t border-white/10 pt-6">
         <select 
-          className="bg-transparent text-sm font-semibold outline-none"
+          className="bg-transparent text-sm font-semibold outline-none cursor-pointer hover:text-blue-400"
           value={store.targetCurrency}
-          onChange={(e) => set({ targetCurrency: e.target.value })}
+          onChange={(e) => useConverterStore.setState({ targetCurrency: e.target.value })}
         >
-          <option value="EUR">Euro Area - Euro</option>
-          <option value="USD">United States - Dollar</option>
-          <option value="JPY">Japan - Yen</option>
+          <option value="EUR" className="bg-[#1a1a1a]">EUR - Euro</option>
+          <option value="USD" className="bg-[#1a1a1a]">USD - US Dollar</option>
+          <option value="NGN" className="bg-[#1a1a1a]">NGN - Nigerian Naira</option>
         </select>
-        <div className="text-4xl font-bold opacity-70">
+        <div className="text-5xl font-light opacity-60">
           {store.targetValue}
         </div>
       </div>
 
-      <div className="text-[10px] opacity-40 mt-4">
-        1 {store.baseCurrency} = {store.rates[store.targetCurrency]} {store.targetCurrency}
+      <div className="text-[10px] opacity-40 mt-2">
+        1 {store.baseCurrency} = {store.rates[store.targetCurrency] || '...'} {store.targetCurrency}
       </div>
     </div>
   );
 };
+
+// CRITICAL: This is the line your error is complaining about!
+export default CurrencyConverter;
