@@ -1,46 +1,33 @@
 import { useEffect } from 'react';
 import useCalculatorStore from '../store/useCalculatorStore';
 
-const useKeyboardInput = () => {
+const useKeyboardInput = (mode, setConvInput) => {
   const store = useCalculatorStore();
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      const { key } = event;
-
-      // Numbers 0-9
-      if (/[0-9]/.test(key)) {
-        event.preventDefault();
-        store.appendNumber(key);
+    const handleKeyDown = (e) => {
+      // 1. Converter Mode Bridge
+      if (mode === 'converter') {
+        if (/[0-9]/.test(e.key)) setConvInput({ type: 'digit', value: e.key });
+        if (e.key === '.') setConvInput({ type: 'digit', value: '.' });
+        if (e.key === 'Backspace') setConvInput({ type: 'backspace' });
+        return;
       }
 
-      // Operators
-      if (key === '+') store.setOperator('+');
-      if (key === '-') store.setOperator('-');
-      if (key === '*') store.setOperator('×');
-      if (key === '/') {
-        event.preventDefault(); // Prevent browser search shortcut
-        store.setOperator('÷');
-      }
-
-      // Actions
-      if (key === '.' || key === ',') store.appendDecimal();
-      if (key === 'Enter' || key === '=') {
-        event.preventDefault();
-        store.calculate();
-      }
-      if (key === 'Escape') store.clear();
+      // 2. Calculator Logic
+      if (/[0-9]/.test(e.key)) store.appendDigit(e.key);
+      if (e.key === '.') store.appendDigit('.');
+      if (e.key === 'Enter' || e.key === '=') store.calculate();
+      if (e.key === 'Backspace') store.deleteLast();
+      if (e.key === 'Escape') store.clear();
       
-      // Backspace logic (requires a new action in your store)
-      if (key === 'Backspace') {
-        // We'll assume you add a performBackspace action to your store
-        // store.performBackspace(); 
-      }
+      const ops = { '+': '+', '-': '-', '*': '×', '/': '÷' };
+      if (ops[e.key]) store.setOperation(ops[e.key]);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [store]);
+  }, [mode, store, setConvInput]);
 };
 
 export default useKeyboardInput;

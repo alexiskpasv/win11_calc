@@ -1,143 +1,92 @@
 import { create } from 'zustand';
-import Big from 'big.js';
-import { create as createMath, all } from 'mathjs';
-
-const math = createMath(all, { precision: 32, number: 'BigNumber' });
+import { evaluate, sin, cos, tan, log, sqrt } from 'mathjs';
 
 const useCalculatorStore = create((set, get) => ({
-  // --- STATE ---
   displayValue: '0',
-  previousValue: null,
-  operator: null,
-  isWaitingForNext: false,
-  history: JSON.parse(localStorage.getItem('calc-history')) || [],
-  
-  // Programmer specific
-  wordSize: 64,
+  prevValue: '',
+  operation: null,
+  history: [],
 
-  // --- STANDARD ACTIONS ---
-  appendNumber: (number) => {
-    set((state) => ({
-      displayValue: state.displayValue === '0' || state.isWaitingForNext 
-        ? String(number) 
-        : state.displayValue + number,
-      isWaitingForNext: false,
-    }));
-  },
-
-  setOperator: (op) => {
-    const { displayValue, operator, previousValue } = get();
-    if (operator && !get().isWaitingForNext) {
-      get().calculate();
-    }
-    set({
-      operator: op,
-      previousValue: get().displayValue,
-      isWaitingForNext: true,
-    });
-  },
-
-  calculate: () => {
-    const { displayValue, previousValue, operator } = get();
-    if (!operator || previousValue === null) return;
-
-    try {
-      const a = new Big(previousValue);
-      const b = new Big(displayValue);
-      let res;
-
-      switch (operator) {
-        case '+': res = a.plus(b); break;
-        case '-': res = a.minus(b); break;
-        case '×': res = a.times(b); break;
-        case '÷': res = b.eq(0) ? 'Error' : a.div(b); break;
-        default: return;
-      }
-
-      const resultStr = res.toString();
-      get().addHistoryItem(`${previousValue} ${operator} ${displayValue}`, resultStr);
-      
-      set({
-        displayValue: resultStr,
-        previousValue: null,
-        operator: null,
-        isWaitingForNext: true,
-      });
-    } catch (err) {
-      set({ displayValue: 'Error' });
-    }
-  },
-
-  // --- SCIENTIFIC ACTIONS ---
-  appendFunction: (func) => {
-    set((state) => ({
-      displayValue: state.displayValue === '0' ? `${func}(` : state.displayValue + `${func}(`,
-      isWaitingForNext: false
-    }));
-  },
-
-  evaluateScientific: () => {
-    const { displayValue } = get();
-    try {
-      const result = math.evaluate(displayValue);
-      get().addHistoryItem(displayValue, result.toString());
-      set({ 
-        displayValue: result.toString(),
-        isWaitingForNext: true 
-      });
-    } catch (error) {
-      set({ displayValue: 'Error' });
-    }
-  },
-
-  // --- PROGRAMMER ACTIONS ---
-  setProgrammerValue: (newVal) => {
-    // Basic validation to ensure it's a valid number string for BigInt
-    try {
-      const mask = (1n << BigInt(get().wordSize)) - 1n;
-      const maskedValue = BigInt(newVal || 0) & mask;
-      set({ displayValue: maskedValue.toString() });
-    } catch (e) {
-      set({ displayValue: '0' });
-    }
-  },
+  // Helper to record operations with mode context
+  addToHistory: (expression, result, mode = 'standard') => set((state) => ({
+    history: [
+      { expression, result, mode, id: Date.now() }, 
+      ...state.history
+    ].slice(0, 50) // Increased limit to 50 for better tracking
+  })),
 
   getFormats: () => {
+    const val = get().displayValue;
+    const num = parseInt(val) || 0;
+    return {
+      hex: num.toString(16).toUpperCase(),
+      dec: num.toString(10),
+      oct: num.toString(8),
+      bin: num.toString(2).padStart(8, '0')
+    };
+  },
+
+  appendDigit: (digit) => set((state) => ({
+    displayValue: state.displayValue === '0' ? String(digit) : state.displayValue + digit
+  })),
+
+  appendFunction: (fn, mode = 'scientific') => set((state) => {
     try {
-      const val = BigInt(get().displayValue || 0);
+      const current = parseFloat(state.displayValue);
+      let result;
+      switch(fn) {
+        case 'sin': result = sin(current); break;
+        case 'cos': result = cos(current); break;
+        case 'tan': result = tan(current); break;
+        case 'log': result = log(current, 10); break;
+        case 'sqrt': result = sqrt(current); break;
+        default: return state;
+      }
+      
+      const resString = result.toString();
+      // Record the scientific function to history
+      get().addToHistory(`${fn}(${current})`, resString, mode);
+      
+      return { displayValue: resString };
+    } catch (e) {
+      return { displayValue: 'Error' };
+    }
+  }),
+
+  setOperation: (op) => set((state) => ({
+    operation: op,
+    prevValue: state.displayValue,
+    displayValue: '0'
+  })),
+
+  calculate: (mode = 'standard') => set((state) => {
+    if (!state.operation) return state;
+
+    try {
+      const expression = `${state.prevValue} ${state.operation} ${state.displayValue}`;
+      const mathExpr = expression.replace('×', '*').replace('÷', '/');
+      const result = evaluate(mathExpr).toString();
+      
+      // Record the standard or programmer operation to history
+      get().addToHistory(expression, result, mode);
+
       return {
-        hex: val.toString(16).toUpperCase(),
-        dec: val.toString(10),
-        oct: val.toString(8),
-        bin: val.toString(2).padStart(get().wordSize, '0').replace(/(.{4})/g, '$1 ')
+        displayValue: result,
+        prevValue: '',
+        operation: null,
       };
     } catch (e) {
-      return { hex: '0', dec: '0', oct: '0', bin: '0' };
+      return { displayValue: 'Error' };
     }
-  },
+  }),
 
-  // --- UTILITY ACTIONS ---
-  clear: () => set({ displayValue: '0', previousValue: null, operator: null, isWaitingForNext: false }),
+  clear: () => set({ displayValue: '0', prevValue: '', operation: null }),
   
-  appendDecimal: () => {
-    if (!get().displayValue.includes('.')) {
-      set({ displayValue: get().displayValue + '.' });
-    }
-  },
+  deleteLast: () => set((state) => ({
+    displayValue: state.displayValue.length > 1 ? state.displayValue.slice(0, -1) : '0'
+  })),
 
-  addHistoryItem: (equation, result) => {
-    set((state) => {
-      const newItem = { id: Date.now(), equation, result };
-      const newHistory = [newItem, ...state.history].slice(0, 20);
-      localStorage.setItem('calc-history', JSON.stringify(newHistory));
-      return { history: newHistory };
-    });
-  },
-
-  clearHistory: () => {
-    localStorage.removeItem('calc-history');
-    set({ history: [] });
-  }
+  clearHistory: () => set({ history: [] }) // Useful for the sidebar UI
 }));
 
 export default useCalculatorStore;

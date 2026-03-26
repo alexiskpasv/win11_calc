@@ -1,62 +1,61 @@
-import React, { useEffect } from 'react';
-import useConverterStore from '../store/useConverterStore';
-import { fetchExchangeRates } from '../services/currencyService';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 
-const CurrencyConverter = () => {
-  const store = useConverterStore();
+const currencies = [
+  { code: 'NGN', name: 'Nigerian Naira', rate: 1 },
+  { code: 'USD', name: 'US Dollar', rate: 0.00067 },
+  { code: 'GBP', name: 'British Pound', rate: 0.00053 },
+  { code: 'EUR', name: 'Euro', rate: 0.00062 }
+];
 
+const CurrencyConverter = ({ externalInput, onInputHandled }) => {
+  const [amount, setAmount] = useState('1');
+  const [fromCurr] = useState(currencies[0]); // NGN
+  const [toCurr] = useState(currencies[1]);   // USD
+
+  // Listen for physical keyboard events from the hook
   useEffect(() => {
-    const loadData = async () => {
-      const data = await fetchExchangeRates(store.baseCurrency);
-      if (data) store.setRates(data);
-    };
-    loadData();
-  }, [store.baseCurrency]);
+    if (externalInput) {
+      if (externalInput.type === 'digit') handleInput(externalInput.value);
+      if (externalInput.type === 'backspace') backspace();
+      if (externalInput.type === 'clear') setAmount('0');
+      onInputHandled(); 
+    }
+  }, [externalInput]);
+
+  const handleInput = (val) => {
+    if (amount === '0' && val !== '.') setAmount(val);
+    else if (val === '.' && amount.includes('.')) return;
+    else setAmount(prev => prev + val);
+  };
+
+  const backspace = () => setAmount(prev => prev.length > 1 ? prev.slice(0, -1) : '0');
+  const result = ((parseFloat(amount || 0) / fromCurr.rate) * toCurr.rate).toFixed(2);
 
   return (
-    <div className="flex flex-col p-6 gap-6 animate-in fade-in duration-500 text-white">
-      {/* Base Currency Selection */}
-      <div className="flex flex-col gap-1">
-        <select 
-          className="bg-transparent text-sm font-semibold outline-none cursor-pointer hover:text-blue-400"
-          value={store.baseCurrency}
-          onChange={(e) => useConverterStore.setState({ baseCurrency: e.target.value })}
-        >
-          <option value="USD" className="bg-[#1a1a1a]">USD - US Dollar</option>
-          <option value="EUR" className="bg-[#1a1a1a]">EUR - Euro</option>
-          <option value="GBP" className="bg-[#1a1a1a]">GBP - British Pound</option>
-          <option value="NGN" className="bg-[#1a1a1a]">NGN - Nigerian Naira</option>
-        </select>
-        <input 
-          type="number" 
-          value={store.baseValue}
-          onChange={(e) => store.updateBaseValue(e.target.value)}
-          className="text-5xl font-light bg-transparent outline-none w-full"
-        />
-      </div>
-
-      {/* Target Currency Selection */}
-      <div className="flex flex-col gap-1 border-t border-white/10 pt-6">
-        <select 
-          className="bg-transparent text-sm font-semibold outline-none cursor-pointer hover:text-blue-400"
-          value={store.targetCurrency}
-          onChange={(e) => useConverterStore.setState({ targetCurrency: e.target.value })}
-        >
-          <option value="EUR" className="bg-[#1a1a1a]">EUR - Euro</option>
-          <option value="USD" className="bg-[#1a1a1a]">USD - US Dollar</option>
-          <option value="NGN" className="bg-[#1a1a1a]">NGN - Nigerian Naira</option>
-        </select>
-        <div className="text-5xl font-light opacity-60">
-          {store.targetValue}
+    <div className="flex flex-col h-full bg-[#202020] text-white">
+      <div className="p-6 space-y-8">
+        <div className="space-y-1">
+          <div className="text-[11px] opacity-60 font-bold uppercase">{fromCurr.code} - {fromCurr.name}</div>
+          <div className="text-5xl font-light">{amount}</div>
+        </div>
+        <div className="space-y-1">
+          <div className="text-[11px] opacity-60 font-bold uppercase">{toCurr.code} - {toCurr.name}</div>
+          <div className="text-5xl font-light text-blue-400">{result}</div>
         </div>
       </div>
 
-      <div className="text-[10px] opacity-40 mt-2">
-        1 {store.baseCurrency} = {store.rates[store.targetCurrency] || '...'} {store.targetCurrency}
+      {/* Internal Keypad for Converter */}
+      <div className="grid grid-cols-3 gap-1 p-2 mt-auto bg-black/10">
+        {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(n => (
+          <button key={n} onClick={() => handleInput(String(n))} className="h-14 hover:bg-white/10 rounded text-xl">{n}</button>
+        ))}
+        <button onClick={() => setAmount('0')} className="h-14 hover:bg-white/10 rounded text-xs opacity-50">CE</button>
+        <button onClick={() => handleInput('0')} className="h-14 hover:bg-white/10 rounded text-xl">0</button>
+        <button onClick={backspace} className="h-14 hover:bg-white/10 rounded text-xl">⌫</button>
       </div>
     </div>
   );
 };
 
-// CRITICAL: This is the line your error is complaining about!
 export default CurrencyConverter;

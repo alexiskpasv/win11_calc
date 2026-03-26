@@ -1,21 +1,19 @@
-@layer base {
-  :root {
-    /* Light Mode Tokens */
-    --bg-mica: rgba(243, 243, 243, 0.85);
-    --bg-button: rgba(255, 255, 255, 0.7);
-    --bg-button-hover: rgba(234, 234, 234, 0.9);
-    --bg-accent: #0067c0;
-    --text-main: #1b1b1b;
-    --border-subtle: rgba(0, 0, 0, 0.05);
-  }
+:root {
+  /* Light Mode Tokens */
+  --bg-mica: rgba(243, 243, 243, 0.85);
+  --bg-button: rgba(255, 255, 255, 0.7);
+  --bg-button-hover: rgba(234, 234, 234, 0.9);
+  --bg-accent: #0067c0;
+  --text-main: #1b1b1b;
+  --border-subtle: rgba(0, 0, 0, 0.05);
+}
 
-  [data-theme='dark'] {
-    /* Dark Mode Tokens */
-    --bg-mica: rgba(32, 32, 32, 0.75);
-    --bg-button: rgba(50, 50, 50, 0.6);
-    --bg-button-hover: rgba(60, 60, 60, 0.8);
-    --bg-accent: #4cc2ff;
-    --text-main: #ffffff;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-  }
+[data-theme='dark'] {
+  /* Dark Mode Tokens */
+  --bg-mica: rgba(32, 32, 32, 0.75);
+  --bg-button: rgba(50, 50, 50, 0.6);
+  --bg-button-hover: rgba(60, 60, 60, 0.8);
+  --bg-accent: #4cc2ff;
+  --text-main: #ffffff;
+  --border-subtle: rgba(255, 255, 255, 0.08);
 }

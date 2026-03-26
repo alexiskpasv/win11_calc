@@ -1,9 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import './styles/variables.css'
-import './index.css' // Standard Tailwind imports
-import './styles/fluent-glass.css'
+import './index.css' // This is the ONLY CSS import you need here
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

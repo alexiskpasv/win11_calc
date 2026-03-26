@@ -1,38 +1,49 @@
-/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply m-0 p-0 overflow-hidden bg-[#0a0a0a] text-white select-none;
-    /* Use the Windows 11 system font stack */
-    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
-
-/* Hide scrollbars for the history sidebar to keep the UI clean */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-@font-face {
-  font-family: 'Segoe UI Variable';
-  src: local('Segoe UI Variable Display'), local('Segoe UI');
-}
+@import "./styles/variables.css";
+@import "./styles/fluent-glass.css";
 
 body {
-  font-family: 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
 }
 
-.result-text {
-  letter-spacing: -0.02em; /* Windows 11 numbers are slightly tighter */
+.mica-window {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Simple button style without the hover-glow script */
+.calc-button {
+  @apply flex items-center justify-center rounded transition-colors duration-100;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.calc-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.history-sidebar {
+  position: absolute;
+  right: 0;
+  top: 40px; /* Below title bar */
+  bottom: 0;
+  width: 280px;
+  background: rgba(32, 32, 32, 0.95);
+  backdrop-filter: blur(10px);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 50;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-sidebar.open {
+  transform: translateX(0);
 }

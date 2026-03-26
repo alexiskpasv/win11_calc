@@ -1,33 +1,41 @@
-// src/components/BitToggler.jsx
 import React from 'react';
 import useCalculatorStore from '../store/useCalculatorStore';
 
 const BitToggler = () => {
-  const { value, setProgrammerValue } = useCalculatorStore();
+  const { displayValue } = useCalculatorStore();
   
-  // Logic to flip a single bit using BigInt XOR
-  const toggleBit = (bitIndex) => {
-    const currentValue = BigInt(value || 0);
-    const newValue = currentValue ^ (1n << BigInt(bitIndex));
-    setProgrammerValue(newValue.toString());
+  // SAFE CONVERSION: Check if it's Hex before converting to BigInt
+  const getBigInt = (val) => {
+    try {
+      // If it's a hex string (contains A-F), prefix with 0x
+      const isHex = /[a-fA-F]/.test(val);
+      return BigInt(isHex ? `0x${val}` : val);
+    } catch (e) {
+      return 0n;
+    }
   };
 
+  const val = getBigInt(displayValue || "0");
+  
+  // Convert to 64-bit binary string
+  const binary = (val >= 0n ? val : (BigInt(2)**BigInt(64) + val))
+    .toString(2)
+    .padStart(64, '0')
+    .split('')
+    .map(Number);
+
   return (
-    <div className="grid grid-cols-8 gap-x-2 gap-y-1 p-4 font-mono text-[9px] bg-black/10 rounded-lg mx-2">
-      {/* Generate 64 bits (from 63 down to 0) */}
-      {Array.from({ length: 64 }).map((_, i) => {
-        const bitIdx = 63 - i;
-        const isOn = (BigInt(value || 0) >> BigInt(bitIdx)) & 1n;
-        return (
-          <div key={bitIdx} className="flex flex-col items-center">
-            <button 
-              onClick={() => toggleBit(bitIdx)}
-              className={`h-3 w-5 rounded-sm transition-colors ${isOn ? 'bg-blue-500' : 'bg-gray-600'}`}
-            />
-            <span className="opacity-40 mt-1">{bitIdx}</span>
-          </div>
-        );
-      })}
+    <div className="grid grid-cols-8 gap-2 p-3 bg-white/5 rounded-md mx-2 my-2 font-mono text-[9px]">
+      {binary.map((bit, i) => (
+        <div key={i} className="flex flex-col items-center gap-1 group">
+          <span className={`transition-opacity ${bit ? "text-blue-400 opacity-100" : "opacity-20"}`}>
+            {bit}
+          </span>
+          <div className={`w-2 h-2 rounded-sm transition-all ${
+            bit ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" : "bg-white/10 group-hover:bg-white/20"
+          }`} />
+        </div>
+      ))}
     </div>
   );
 };
