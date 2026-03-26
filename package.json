@@ -11,7 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "homepage": "https://github.com/alexiskpasv/win11_calc.git",
+    "homepage": "https://alexiskpasv.github.io/win11_calc/",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "big.js": "^6.2.1",
